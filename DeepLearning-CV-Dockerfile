@@ -3,14 +3,18 @@ FROM nvcr.io/nvidia/pytorch:19.02-py3
 ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
-# install dependencies    
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends\     
+# change shell to bash
+SHELL ["/bin/bash", "-c"]
+
+# install dependencies
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends\
         build-essential \
         software-properties-common \
         python3 \
         python3-dev \
         python3-tk \
         python3-pip \
+    python3-setuptools \
         build-essential \
         libfreetype6-dev \
         libpng-dev \
@@ -27,77 +31,37 @@ RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends\
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# install dependencies    
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends\     
-        build-essential \
-        software-properties-common \
-        python3 \
-        python3-dev \
-        python3-tk \
-        python3-pip \
-        build-essential \
-        libfreetype6-dev \
-        libpng-dev \
-        libzmq3-dev \
-        libspatialindex-dev \
-        gdal-bin \
-        libgdal-dev \
-        python3-gdal \
-        libsm6 \
-        vim \
-        wget \
-        zip \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# install dependencies    
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends\     
-        build-essential \
-        software-properties-common \
-        python3 \
-        python3-dev \
-        python3-tk \
-        python3-pip \
-        build-essential \
-        libfreetype6-dev \
-        libpng-dev \
-        libzmq3-dev \
-        libspatialindex-dev \
-        gdal-bin \
-        libgdal-dev \
-        python3-gdal \
-        libsm6 \
-        vim \
-        wget \
-        zip \
-        && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-
-# install python package
-RUN pip3 --no-cache-dir install setuptools && \
-    pip3 --no-cache-dir install wheel && \
-    pip3 install \
-        Pillow \
-        matplotlib \
-        opencv-contrib-python \
-        scikit-image \
-        scikit-learn \
-        xgboost
-
-# Install Tensorflow GPU
-RUN conda install -c anaconda tensorflow-gpu
-
-# install node for running jupyterlab extensions
+# upgrade pip
 RUN conda install nodejs
 
-# Install keras
-RUN pip3 install keras
+# Install jupyter latest
+RUN /opt/conda/bin/python -m pip install --upgrade jupyter jupyter-client jupyter-console jupyter-core jupyterlab_server jupyterlab
 
-WORKDIR "/workspace"
+# Install other libs
+RUN /opt/conda/bin/python -m pip install nbdime jupyterlab-nvdashboard Pillow setuptools matplotlib opencv-contrib-python scikit-image scikit-learn xgboost
+
+# check
+RUN which jupyter           # should be /opt/conda/bin/jupyter
+RUN which jupyter-lab       # should be /opt/conda/bin/jupyter-lab
+
+# Install jupyter extensions
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager \
+               @jupyterlab/git \
+               @jupyterlab/github \
+               @jupyterlab/toc \
+               @agoose77/jupyterlab-markup \
+               jupyterlab_tensorboard \
+               jupyterlab-nvdashboard \
+               nbdime-jupyterlab
+RUN jupyter serverextension enable jupyterlab
+
+RUN /opt/conda/bin/python -m ipykernel install
+
+# tensorflow gpu
+RUN conda install tensorflow-gpu
+
+# upgrade pip
+RUN /opt/conda/bin/python -m pip install --upgrade pip
+
+WORKDIR "/root/"
 CMD ["/bin/bash"]
-
-
-
