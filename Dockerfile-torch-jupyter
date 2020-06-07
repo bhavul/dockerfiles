@@ -1,0 +1,24 @@
+FROM pytorch/pytorch
+
+# change shell to bash
+SHELL ["/bin/bash", "-c"]
+
+# Install some important libraries
+RUN pip install --upgrade jupyter jupyter-client jupyter-console jupyter-core jupyterlab_server jupyterlab scikit-learn
+
+# check
+RUN which jupyter           # should be /opt/conda/bin/jupyter
+RUN which jupyter-lab       # should be /opt/conda/bin/jupyter-lab
+
+# Enable extensions in jupyterlab
+RUN jupyter serverextension enable jupyterlab
+
+# Add Tini. Tini operates as a process subreaper for jupyter. This prevents kernel crashes.
+ENV TINI_VERSION v0.6.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+
+WORKDIR "/src/"
+CMD ["jupyter-lab", "--port=8888", "--no-browser", "--ip=0.0.0.0", "--allow-root"]

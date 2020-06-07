@@ -1,4 +1,23 @@
-# dockerfiles
+# Dockerfiles repository
+
+This repo contains various different dockerfiles which help in Data Science workflows. 
+
+
+## Dockerfile-torch-jupyter
+
+This contains just the latest pytorch container and jupyter and jupyter lab. It is built for CPU, for testing locally. 
+
+```
+# build docker image
+docker build -f <path-of-dockerfile> -t torch-jupyter:latest .
+
+# run the image
+docker run -it -p 8888:8888 -v $PWD:/src/ --name torchjupy torch-jupyter:latest
+```	
+
+
+## DeepLearning-CV-Dockerfile
+
 This repo contains different dockerfiles which I require. Currently, there's just one dockerfile which is Deep Learning dockerfile for computer vision projects. It contains PyTorch, Tensorflow, Scikit, OpenCV and some other packages.   
 
 Commands to use :   
